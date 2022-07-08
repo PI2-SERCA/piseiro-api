@@ -11,6 +11,9 @@ coverage.xml
 Coverage
 junit.xml
 
+# Env
+.venv
+
 # Tox
 .tox
 

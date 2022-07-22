@@ -14,4 +14,7 @@ junit.xml
 # Tox
 .tox
 
+# Environments
+.venv
+
 analytics-raw-data/

@@ -3,3 +3,5 @@ flask-restful
 requests
 flask-mongoengine
 pygcode
+shapely
+numpy

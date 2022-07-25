@@ -6,6 +6,8 @@ from src.resources.cuts import Cuts
 from src.resources.rooms import Rooms
 
 from .config import MONGO_SETTINGS
+from src.resources.floor_laying import FloorLaying
+from src.resources.corners import Corners
 
 
 def create_app(is_testing=False):
@@ -24,6 +26,9 @@ def create_app(is_testing=False):
         app.config["MONGODB_SETTINGS"] = MONGO_SETTINGS
 
     api = Api(app)
+
+    api.add_resource(Corners, "/corners")
+    api.add_resource(FloorLaying, "/floor-laying")
 
     db = MongoEngine(app)
 

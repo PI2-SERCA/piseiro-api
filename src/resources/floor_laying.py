@@ -4,7 +4,7 @@ from flask_restful import Resource
 from shapely.affinity import rotate
 from shapely.geometry import Point, Polygon, box
 from shapely.geometry.collection import GeometryCollection
-from src.resources.utils import axis_ajust, normalize, get_corner_from_index, two_points_slope, get_unique_cuts
+from src.resources.utils import axis_ajust, get_corner_from_index, two_points_slope, get_unique_cuts
 import numpy as np
 import requests
 
@@ -102,7 +102,7 @@ class FloorLaying(Resource):
                     # if new_ceramic.intersects(Point((refx,refy))):
                     #     start = ceramic
 
-                    x,y = ceramic.exterior.coords.xy
+                    coords = ceramic.exterior.coords
 
                     if not fig.covers(ceramic):
                         intersection = fig.intersection(ceramic)
@@ -110,16 +110,16 @@ class FloorLaying(Resource):
                             if type(intersection) is GeometryCollection:
                                 for polyg in intersection.geoms:
                                     if type(polyg) is Polygon:
-                                        x,y = polyg.exterior.coords.xy
+                                        coords = polyg.exterior.coords
                         else:
-                            x,y = intersection.exterior.xy
+                            coords = intersection.exterior.coords
 
-                        result["cuts"].append(normalize(x,y))
+                        result["cuts"].append(list(coords))
 
                     else:
                         result["full"] += 1
 
-        result["cuts"] = get_unique_cuts(result["cuts"])
+        result["unique_cuts"] = get_unique_cuts(result["cuts"])
 
         return jsonify(
             floor_laying=result,

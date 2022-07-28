@@ -1,5 +1,5 @@
 from shapely.geometry import Point, Polygon
-from shapely.affinity import translate
+from shapely.affinity import translate, rotate
 import numpy as np
 import math
 
@@ -58,22 +58,26 @@ def get_corner_from_index(index, points):
 
     return a,b,c
 
-def normalize(x, y):
+def normalize_polygon(polygon):
+    x,y = polygon.exterior.coords.xy
     x = np.around(np.array(x) - min(x), 5)
     y = np.around(np.array(y) - min(y),5)
+    points = list(zip(x,y))
     
-    return list(zip(x,y))
+    return Polygon(points)
 
 def get_unique_cuts(cuts):
     unique_cuts = []
     for cut in cuts:
-        c = Polygon(cut)
+        c = normalize_polygon(Polygon(cut))
         unique = True
         for uc in unique_cuts:
-            if c.equals(uc[0]):
-                uc[1] += 1
-                unique = False
-                break
+            for degrees in range(4):
+                c = normalize_polygon(rotate(c, 90))
+                if c.equals(uc[0]):
+                    uc[1] += 1
+                    unique = False
+                    break
         if unique:
             unique_cuts.append([c, 1])
             
@@ -91,11 +95,7 @@ def get_optimized_cuts(cuts, ceramic):
     	slopes = get_slopes(points)
     	
     	for slope in slopes:
-    		cut_ = rotate(cut, -slope)
-    		x,y = cut_.exterior.coords.xy
-    		points = normalize(x, y)
-
-    		cut_ = Polygon(points)
+    		cut_ = normalize_polygon(rotate(cut, -slope))
     		xmin, ymin, xmax, ymax = cut_.bounds
     		
     		if not cut_.within(ceramic):

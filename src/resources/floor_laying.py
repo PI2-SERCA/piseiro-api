@@ -10,49 +10,54 @@ import requests
 
 class FloorLaying(Resource):
     def get(self):
+
+        for arg in ['points', 'corner', 'ceramic_data']:
+            if arg not in request.args.keys():
+                return jsonify(
+                    error=f"Bad Request: Missing argument '{arg}'",
+                    status=requests.codes.bad_request
+                )
+
         points = request.args.get('points')
-
-        if not points:
-            return jsonify(
-                error="Bad Request: Missing argument 'points'",
-                status=400
-            )
-
-        points = json.loads(points)
-
         corner = request.args.get('corner')
-
-        if not corner:
-            return jsonify(
-                error="Bad Request: Missing argument 'corner'",
-                status=400
-            )
-
-        corner = int(corner)
-
-        
         ceramic_data = request.args.get('ceramic_data')
 
-        if not ceramic_data:
+        try:
+            corner = int(corner)
+        except:
             return jsonify(
-                error="Bad Request: Missing argument 'ceramic_data'",
-                status=400
+                error="Bad Request: Wrong format in 'corner'",
+                status=requests.codes.bad_request
             )
 
-        ceramic_data = json.loads(ceramic_data)
+        try:
+            ceramic_data = json.loads(ceramic_data)
+        except:
+            return jsonify(
+                error="Bad Request: Wronge JSON format in 'ceramic_data'",
+                status=requests.codes.bad_request
+            )
 
-        if ['height', 'spacing', 'width'] != sorted(ceramic_data.keys()):
+        must = {'height', 'spacing', 'width'}
+        if must.intersection(set(ceramic_data.keys())) != must:
             return jsonify(
                 error="Bad Request: Argument 'ceramic_data' invalid",
-                status=400
+                status=requests.codes.bad_request
+            )
+
+        try:
+            points = json.loads(points)
+        except:
+            return jsonify(
+                error="Bad Request: Wrong JSON format in 'points'",
+                status=requests.codes.bad_request
             )
 
         fig = Polygon(points)
-
         if not fig.is_valid:
             return jsonify(
                 error="Bad Request: Polygon invalid",
-                status=400
+                status=requests.codes.bad_request
             )
 
         a,b,c = get_corner_from_index(corner, points)
@@ -123,5 +128,5 @@ class FloorLaying(Resource):
 
         return jsonify(
             floor_laying=result,
-            status=200
+            status=requests.codes.ok
         )

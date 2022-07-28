@@ -1,4 +1,4 @@
-from shapely.geometry import Point, Polygon
+from shapely.geometry import Point, Polygon, MultiLineString
 from shapely.affinity import translate, rotate
 import numpy as np
 import math
@@ -72,12 +72,13 @@ def get_unique_cuts(cuts):
         c = normalize_polygon(Polygon(cut))
         unique = True
         for uc in unique_cuts:
+            c_ = c
             for degrees in range(4):
-                c = normalize_polygon(rotate(c, 90))
-                if c.equals(uc[0]):
+                if c_.equals(uc[0]):
                     uc[1] += 1
                     unique = False
                     break
+                c_ = normalize_polygon(rotate(c_, 90))
         if unique:
             unique_cuts.append([c, 1])
             
@@ -85,50 +86,48 @@ def get_unique_cuts(cuts):
 
     return unique_cuts
 
-def get_optimized_cuts(cuts, ceramic):
-    optimized_cuts = []	
-    for cut in cuts:
-    	points = cut.exterior.coords
-    	
-    	best_cut_boundary = 0
-    	best_cut = cut
-    	slopes = get_slopes(points)
-    	
-    	for slope in slopes:
-    		cut_ = normalize_polygon(rotate(cut, -slope))
-    		xmin, ymin, xmax, ymax = cut_.bounds
-    		
-    		if not cut_.within(ceramic):
-    			continue
-    		
-    		i = 0
-    		for i in range(0, len(points) - 1):
-    			a,b,c = get_corner_from_index(i, points)
+def get_optimized_cut(points, ceramic):
+    cut = Polygon(points)
+    
+    best_cut_boundary = 0
+    best_cut = cut
+    slopes = get_slopes(points)
 
-    			new_cut = cut_
+    _, _, ceramic_width, ceramic_height = ceramic.bounds
+    
+    for slope in slopes:
+        cut_ = normalize_polygon(rotate(cut, -slope))
+        xmin, ymin, xmax, ymax = cut_.bounds
+        
+        if not cut_.within(ceramic):
+            continue
+        
+        i = 0
+        for i in range(0, len(points) - 1):
+            a,b,c = get_corner_from_index(i, points)
 
-    			if b[0] == xmin and b[1] == ymax:
-    				new_cut = translate(cut_, xoff=-xmin, yoff=ceramic_height - ymax)
+            new_cut = cut_
 
-    			if b[0] == xmin and b[1] == ymin:
-    				new_cut = translate(cut_, xoff=-xmin, yoff=-ymin) 
+            if b[0] == xmin and b[1] == ymax:
+                new_cut = translate(cut_, xoff=-xmin, yoff=ceramic_height - ymax)
 
-    			if b[0] == xmax and b[1] == ymax:
-    				new_cut = translate(cut_, xoff=ceramic_width - xmax, yoff=ceramic_height - ymax)
+            if b[0] == xmin and b[1] == ymin:
+                new_cut = translate(cut_, xoff=-xmin, yoff=-ymin) 
 
-    			if b[0] == xmax and b[1] == ymin:
-    				new_cut = translate(cut_, xoff=ceramic_width - xmax, yoff=-ymin)
-    			
-    			boundary_intersection = ceramic.boundary.intersection(new_cut.boundary).length
-    			if boundary_intersection > best_cut_boundary:
-    				best_cut = new_cut
-    				best_cut_boundary = boundary_intersection
+            if b[0] == xmax and b[1] == ymax:
+                new_cut = translate(cut_, xoff=ceramic_width - xmax, yoff=ceramic_height - ymax)
 
-    			i += 1
+            if b[0] == xmax and b[1] == ymin:
+                new_cut = translate(cut_, xoff=ceramic_width - xmax, yoff=-ymin)
+            
+            boundary_intersection = ceramic.boundary.intersection(new_cut.boundary).length
+            if boundary_intersection > best_cut_boundary:
+                best_cut = new_cut
+                best_cut_boundary = boundary_intersection
 
-    	optimized_cuts.append(best_cut)	
-    		
-    return optimized_cuts
+            i += 1
+
+    return best_cut
 
 def get_slopes(points):
     slopes = set()
@@ -138,3 +137,21 @@ def get_slopes(points):
         slopes.add(slope)
             
     return slopes
+
+def get_scribe_lines(cut, ceramic):
+    trace = cut.boundary.difference(ceramic.boundary)
+    coords = []
+    if type(trace) is MultiLineString:
+        for line in trace.geoms[::-1]:
+            x, y = np.around(line.coords.xy, 5)
+            points = list(zip(x,y))
+            
+            if len(coords) > 0 and points[0] in coords[-1]:
+                coords[-1] += points[1:]   
+            else:
+                coords.append(points)
+    else:
+        x, y = np.around(trace.coords.xy, 5)
+        coords.append(list(zip(x,y)))
+        
+    return coords

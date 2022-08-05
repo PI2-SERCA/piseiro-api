@@ -4,7 +4,7 @@ from flask_restful import Resource
 from shapely.affinity import rotate
 from shapely.geometry import Point, Polygon, box
 from shapely.geometry.collection import GeometryCollection
-from src.resources.utils import axis_ajust, get_corner_from_index, two_points_slope, get_unique_cuts
+from src.resources.utils import axis_ajust, get_corner_from_index, two_points_slope, get_unique_cuts, points_to_base64_image
 import numpy as np
 import requests
 
@@ -124,7 +124,11 @@ class FloorLaying(Resource):
                     else:
                         result["full"] += 1
 
-        result["unique_cuts"] = get_unique_cuts(result["cuts"])
+        result["cuts"] = get_unique_cuts(result["cuts"])
+
+        for cut in result["cuts"]:
+            base64 = points_to_base64_image(cut["points"])
+            cut["base64"] = base64
 
         return jsonify(
             floor_laying=result,

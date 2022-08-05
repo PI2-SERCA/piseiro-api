@@ -90,7 +90,11 @@ def get_unique_cuts(cuts):
         if unique:
             unique_cuts.append([c, 1])
 
-    unique_cuts = [[list(cut.exterior.coords), count] for cut, count in unique_cuts]
+    tmp = []
+    for points, quantity in unique_cuts:
+        tmp.append({"points": list(points.exterior.coords), "quantity": quantity})
+        
+    unique_cuts = tmp
 
     return unique_cuts
 
@@ -172,13 +176,13 @@ def get_scribe_lines(cut, ceramic):
     return coords
 
 
-def binaryToBase64(binary_data):
+def binary_to_base64(binary_data):
     base64_bytes = base64.b64encode(binary_data)
 
     return base64_bytes.decode("ascii")
 
 
-def pointsToBase64Image(points):
+def points_to_base64_image(points):
     x_axis, y_axis = zip(*points)
 
     image_bytes = io.BytesIO()
@@ -194,4 +198,4 @@ def pointsToBase64Image(points):
 
     image_bytes.seek(0)
 
-    return binaryToBase64(image_bytes.read())
+    return binary_to_base64(image_bytes.read())

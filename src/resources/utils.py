@@ -1,10 +1,10 @@
-from shapely.geometry import Point, Polygon, MultiLineString
 from shapely.affinity import translate, rotate
-import numpy as np
-import math
-import io
+from shapely.geometry import Point, Polygon, MultiLineString
 import base64
+import io
+import math
 import matplotlib.pyplot as plt
+import numpy as np
 
 
 def is_valid_corner(points, a, b, c):
@@ -182,7 +182,7 @@ def binary_to_base64(binary_data):
     return base64_bytes.decode("ascii")
 
 
-def points_to_base64_image(points):
+def points_to_base64_image(points, ceramic_data):
     x_axis, y_axis = zip(*points)
 
     image_bytes = io.BytesIO()
@@ -191,6 +191,8 @@ def points_to_base64_image(points):
 
     plt.fill(x_axis, y_axis)
     plt.axis("off")
+    plt.xlim([0,ceramic_data["width"]])
+    plt.ylim([0,ceramic_data["height"]])
 
     fig.savefig(
         image_bytes, format="png", dpi=fig.dpi, facecolor="white", edgecolor="none"

@@ -189,7 +189,7 @@ def points_to_base64_image(points):
 
     fig = plt.figure()
 
-    plt.plot(x_axis, y_axis)
+    plt.fill(x_axis, y_axis)
     plt.axis("off")
 
     fig.savefig(

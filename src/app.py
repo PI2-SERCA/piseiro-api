@@ -9,6 +9,7 @@ from .config import MONGO_SETTINGS
 from src.resources.floor_laying import FloorLaying
 from src.resources.corners import Corners
 from src.resources.scribe import Scribe
+from src.resources.single_cut import SingleCut
 
 
 def create_app(is_testing=False):
@@ -31,6 +32,7 @@ def create_app(is_testing=False):
     api.add_resource(Corners, "/corners")
     api.add_resource(FloorLaying, "/floor-laying")
     api.add_resource(Scribe, "/scribe")
+    api.add_resource(SingleCut, "/single-cut")
 
     db = MongoEngine(app)
 

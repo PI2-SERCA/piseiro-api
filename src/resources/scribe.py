@@ -52,7 +52,8 @@ class Scribe(Resource):
                 scribe_lines = optimized_cut
 
             #gcode = get_gcode(scribe_lines)
-            result.append({'points': list(optimized_cut.exterior.coords), "quantity": cut["quantity"]})
+            cut["points"] = list(optimized_cut.exterior.coords)
+            result.append(cut)
 
 
         return jsonify(

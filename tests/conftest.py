@@ -1,7 +1,5 @@
 import pytest
 from src.app import create_app
-from src.model.pre_config import PreConfig
-from src.model.metrics_component_tree import MetricsComponentTree
 
 
 @pytest.fixture()
@@ -18,9 +16,6 @@ def app():
     yield app
 
     # clean up / reset resources here
-
-    PreConfig.drop_collection()
-    MetricsComponentTree.drop_collection()
 
 
 @pytest.fixture()

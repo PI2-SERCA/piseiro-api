@@ -1,33 +1,27 @@
 from flask import request, jsonify
 from flask_restful import Resource
-from shapely.geometry import Polygon
+from shapely.geometry import box, Polygon
+from src.resources.utils import get_scribe_lines
 import io
 import json
-import matplotlib.pyplot as plt
 import requests
 from src.resources.utils import binary_to_base64
 
 
 class SingleCut(Resource):
-    def get(self):
+    def post(self):
+        data = request.get_json(force=True)
 
-        for arg in ['points', 'ceramic_data']:
-            if arg not in request.args.keys():
+        for arg in ['points', 'repetitions', 'ceramic_data']:
+            if arg not in data.keys():
                 return jsonify(
                     error=f"Bad Request: Missing argument '{arg}'",
                     status=requests.codes.bad_request
                 )
 
-        points = request.args.get('points')
-        ceramic_data = request.args.get('ceramic_data')
-
-        try:
-            ceramic_data = json.loads(ceramic_data)
-        except:
-            return jsonify(
-                error="Bad Request: Wronge JSON format in 'ceramic_data'",
-                status=requests.codes.bad_request
-            )
+        points = data['points']
+        repetitions = data['repetitions']
+        ceramic_data = data['ceramic_data']
 
         must = {'height', 'width'}
         if must.intersection(set(ceramic_data.keys())) != must:
@@ -36,11 +30,9 @@ class SingleCut(Resource):
                 status=requests.codes.bad_request
             )
 
-        try:
-            points = json.loads(points)
-        except:
+        if type(repetitions) is not int:
             return jsonify(
-                error="Bad Request: Wrong JSON format in 'points'",
+                error="Bad Request: Argument 'repetitions' is not integer",
                 status=requests.codes.bad_request
             )
 
@@ -51,23 +43,12 @@ class SingleCut(Resource):
                 status=requests.codes.bad_request
             )
 
-        image_bytes = io.BytesIO()
-        figure = plt.figure()
+        ceramic = box(0, 0, ceramic_data['width'], ceramic_data['height']) 
 
-        x, y = fig.exterior.coords.xy
-        plt.fill(x, y, "white")
-        plt.xlim([0, ceramic_data["width"]])
-        plt.ylim([0, ceramic_data["height"]])
-        plt.axis("off")
+        cut = Polygon(points)
+        scribe_lines = get_scribe_lines(cut, ceramic)
 
-        figure.savefig(
-            image_bytes, format="png", dpi=figure.dpi, facecolor="tab:blue", edgecolor="none"
-        )
-        image_bytes.seek(0)
-
-        result = {}
-        result["base64"] = binary_to_base64(image_bytes.read())
-        result["points"] = points
+        result = {"points": scribe_lines}
 
         return jsonify(
             single_cut=result,

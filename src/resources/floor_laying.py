@@ -127,7 +127,7 @@ class FloorLaying(Resource):
         result["cuts"] = get_unique_cuts(result["cuts"])
 
         for cut in result["cuts"]:
-            base64 = points_to_base64_image(cut["points"])
+            base64 = points_to_base64_image(cut["points"], ceramic_data)
             cut["base64"] = base64
 
         return jsonify(

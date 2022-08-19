@@ -10,7 +10,7 @@ class Scribe(Resource):
     def post(self):
         data = request.get_json(force=True)
 
-        for arg in ['cuts', 'repetitions', 'ceramic_data', 'type']:
+        for arg in ['cuts', 'repetitions', 'ceramic_data']:
         	if arg not in data.keys():
         		return jsonify(
         			error=f"Bad Request: Missing argument '{arg}'",
@@ -19,18 +19,11 @@ class Scribe(Resource):
         cuts = data['cuts']
         repetitions = data['repetitions']
         ceramic_data = data['ceramic_data']
-        cut_type = data['type']
         
         must = {'height', 'width'}
         if must.intersection(set(ceramic_data.keys())) != must:
             return jsonify(
                 error="Bad Request: Argument 'ceramic_data' invalid",
-                status=requests.codes.bad_request
-            )
-
-        if type(cut_type) is not int:
-            return jsonify(
-                error="Bad Request: Argument 'type' is not integer",
                 status=requests.codes.bad_request
             )
 
@@ -44,15 +37,11 @@ class Scribe(Resource):
 
         result = []
         for cut in cuts:
-            if cut_type:
-                optimized_cut = get_optimized_cut(cut["points"], ceramic) 
-                scribe_lines = get_scribe_lines(optimized_cut, ceramic)
-            else:
-                optimized_cut = Polygon(cut["points"])
-                scribe_lines = optimized_cut
+            optimized_cut = get_optimized_cut(cut["points"], ceramic) 
+            scribe_lines = get_scribe_lines(optimized_cut, ceramic)
 
             #gcode = get_gcode(scribe_lines)
-            cut["points"] = list(optimized_cut.exterior.coords)
+            cut["points"] = list(scribe_lines)
             result.append(cut)
 
 

@@ -14,4 +14,7 @@ junit.xml
 # Tox
 .tox
 
+# VSCode
+.vscode
+
 analytics-raw-data/

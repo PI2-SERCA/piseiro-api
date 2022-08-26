@@ -1,4 +1,5 @@
 from flask import Flask
+from flask_cors import CORS
 from flask_restful import Api
 from flask_mongoengine import MongoEngine
 
@@ -17,6 +18,8 @@ def create_app(is_testing=False):
     Create the Flask app
     """
     app = Flask(__name__)
+
+    CORS(app)
 
     if is_testing:
         app.config["TESTING"] = True

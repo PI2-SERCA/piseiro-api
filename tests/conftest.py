@@ -1,5 +1,7 @@
 import pytest
 from src.app import create_app
+from src.model.cut import Cut
+from src.model.room import Room
 
 
 @pytest.fixture()
@@ -16,6 +18,9 @@ def app():
     yield app
 
     # clean up / reset resources here
+
+    Cut.drop_collection()
+    Room.drop_collection()
 
 
 @pytest.fixture()

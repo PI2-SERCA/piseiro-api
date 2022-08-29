@@ -14,6 +14,9 @@ junit.xml
 # Tox
 .tox
 
+# Environments
+.venv
+
 # VSCode
 .vscode
 

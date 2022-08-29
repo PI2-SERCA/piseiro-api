@@ -1,6 +1,10 @@
 from flask import Flask
 from flask_restful import Api
 from flask_mongoengine import MongoEngine
+
+from src.resources.cuts import Cuts
+from src.resources.rooms import Rooms
+
 from .config import MONGO_SETTINGS
 
 
@@ -22,5 +26,9 @@ def create_app(is_testing=False):
     api = Api(app)
 
     db = MongoEngine(app)
+
+    api.add_resource(Rooms, "/rooms")
+
+    api.add_resource(Cuts, "/cuts")
 
     return app, api, db

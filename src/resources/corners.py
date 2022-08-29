@@ -15,10 +15,10 @@ class Corners(Resource):
                 error="Bad Request: Missing argument 'points'",
                 status=requests.codes.bad_request
             )
-        
+
         try:
             points = json.loads(points)
-        except:
+        except Exception:
             return jsonify(
                 error="Bad Request: Wrong JSON format in 'points'",
                 status=requests.codes.bad_request
@@ -32,14 +32,14 @@ class Corners(Resource):
 
         corners = []
         for i in range(0, len(points) - 1):
-            a,b,c = get_corner_from_index(i, points)
+            a, b, c = get_corner_from_index(i, points)
 
-            angle = three_points_angle(a,b,c)
+            angle = three_points_angle(a, b, c)
 
             if abs(angle) == 90:
-                if is_valid_corner(points,a,b,c):
+                if is_valid_corner(points, a, b, c):
                     corners.append(i)
-        
+
         return jsonify(
             corners=corners,
             status=requests.codes.ok

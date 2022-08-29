@@ -93,7 +93,7 @@ def get_unique_cuts(cuts):
     tmp = []
     for points, quantity in unique_cuts:
         tmp.append({"points": list(points.exterior.coords), "quantity": quantity})
-        
+
     unique_cuts = tmp
 
     return unique_cuts
@@ -191,8 +191,8 @@ def points_to_base64_image(points, ceramic_data):
 
     plt.fill(x_axis, y_axis)
     plt.axis("off")
-    plt.xlim([0,ceramic_data["width"]])
-    plt.ylim([0,ceramic_data["height"]])
+    plt.xlim([0, ceramic_data["width"]])
+    plt.ylim([0, ceramic_data["height"]])
 
     fig.savefig(
         image_bytes, format="png", dpi=fig.dpi, facecolor="white", edgecolor="none"

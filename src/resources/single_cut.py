@@ -2,10 +2,7 @@ from flask import request, jsonify
 from flask_restful import Resource
 from shapely.geometry import box, Polygon
 from src.resources.utils import get_scribe_lines
-import io
-import json
 import requests
-from src.resources.utils import binary_to_base64
 
 
 class SingleCut(Resource):
@@ -43,7 +40,7 @@ class SingleCut(Resource):
                 status=requests.codes.bad_request
             )
 
-        ceramic = box(0, 0, ceramic_data['width'], ceramic_data['height']) 
+        ceramic = box(0, 0, ceramic_data['width'], ceramic_data['height'])
 
         cut = Polygon(points)
         scribe_lines = get_scribe_lines(cut, ceramic)

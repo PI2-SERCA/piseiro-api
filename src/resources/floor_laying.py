@@ -2,15 +2,22 @@ import json
 from flask import request, jsonify
 from flask_restful import Resource
 from shapely.affinity import rotate
-from shapely.geometry import Point, Polygon, box
+from shapely.geometry import Polygon, box
 from shapely.geometry.collection import GeometryCollection
-from src.resources.utils import axis_ajust, get_corner_from_index, two_points_slope, get_unique_cuts, points_to_base64_image
+from src.resources.utils import (
+    axis_ajust,
+    get_corner_from_index,
+    two_points_slope,
+    get_unique_cuts,
+    points_to_base64_image
+)
 import numpy as np
 import requests
 
-class FloorLaying(Resource):
-    def get(self):
 
+class FloorLaying(Resource):
+    # flake8: noqa: C901
+    def get(self):
         for arg in ['points', 'corner', 'ceramic_data']:
             if arg not in request.args.keys():
                 return jsonify(
@@ -24,7 +31,7 @@ class FloorLaying(Resource):
 
         try:
             corner = int(corner)
-        except:
+        except Exception:
             return jsonify(
                 error="Bad Request: Wrong format in 'corner'",
                 status=requests.codes.bad_request
@@ -32,7 +39,7 @@ class FloorLaying(Resource):
 
         try:
             ceramic_data = json.loads(ceramic_data)
-        except:
+        except Exception:
             return jsonify(
                 error="Bad Request: Wronge JSON format in 'ceramic_data'",
                 status=requests.codes.bad_request
@@ -47,7 +54,7 @@ class FloorLaying(Resource):
 
         try:
             points = json.loads(points)
-        except:
+        except Exception:
             return jsonify(
                 error="Bad Request: Wrong JSON format in 'points'",
                 status=requests.codes.bad_request
@@ -60,26 +67,26 @@ class FloorLaying(Resource):
                 status=requests.codes.bad_request
             )
 
-        a,b,c = get_corner_from_index(corner, points)
-        slope = two_points_slope(a,b) % 90
+        a, b, c = get_corner_from_index(corner, points)
+        slope = two_points_slope(a, b) % 90
 
         if slope != 0:
-        	fig = rotate(fig, slope)
+            fig = rotate(fig, slope)
             # Update config after rotation
-        	points = list(fig.exterior.coords)
-        	a,b,c = get_corner_from_index(corner, points)
+            points = list(fig.exterior.coords)
+            a, b, c = get_corner_from_index(corner, points)
 
         xmin, ymin, xmax, ymax = fig.bounds
         total_width = ceramic_data["width"] + ceramic_data["spacing"]
         total_height = ceramic_data["height"] + ceramic_data["spacing"]
 
-        # Shift xmin/ymin to match corner 
+        # Shift xmin/ymin to match corner
         refx, refy = points[corner]
-        xmin = np.around(xmin - (total_width - (refx - xmin)  % total_width), 5)
+        xmin = np.around(xmin - (total_width - (refx - xmin) % total_width), 5)
         ymin = np.around(ymin - (total_height - (refy - ymin) % total_height), 5)
 
         # Prevent ending up with spacing touching the wall
-        x,y = axis_ajust(a,b,c)
+        x, y = axis_ajust(a, b, c)
         fix_x = ceramic_data["spacing"] if x else 0
         fix_y = ceramic_data["spacing"] if y else 0
 
@@ -94,15 +101,15 @@ class FloorLaying(Resource):
                     np.around(x2, 5),
                     np.around(y2, 5))
 
-                x,y = ceramic.exterior.coords.xy
+                x, y = ceramic.exterior.coords.xy
 
                 if fig.intersects(ceramic) and not ceramic.touches(fig):
 
-                    a,b,c,d = ceramic.bounds
+                    a, b, c, d = ceramic.bounds
                     c += ceramic_data["spacing"]
                     d += ceramic_data["spacing"]
 
-                    new_ceramic = box(a,b,c,d)
+                    # new_ceramic = box(a, b, c, d)
 
                     # if new_ceramic.intersects(Point((refx,refy))):
                     #     start = ceramic

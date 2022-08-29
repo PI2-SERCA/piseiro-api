@@ -17,4 +17,7 @@ junit.xml
 # Environments
 .venv
 
+# VSCode
+.vscode
+
 analytics-raw-data/

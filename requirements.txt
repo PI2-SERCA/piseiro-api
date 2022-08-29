@@ -1,5 +1,9 @@
-flask
-flask-restful
-requests
-flask-mongoengine
-pygcode
+flask==2.1.2
+flask-restful==0.3.9
+requests==2.28.1
+flask-mongoengine==1.0.0
+shapely==1.8.2
+numpy==1.21.0
+matplotlib==3.5.2
+flask-cors==3.0.10
+pygcode==0.2.1

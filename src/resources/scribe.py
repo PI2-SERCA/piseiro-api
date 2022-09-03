@@ -4,35 +4,37 @@ from shapely.geometry import box
 from src.resources.utils import get_optimized_cut, get_scribe_lines
 import requests
 
+from src.util.broker import send_cuts
+
 
 class Scribe(Resource):
     def post(self):
         data = request.get_json(force=True)
 
-        for arg in ['cuts', 'repetitions', 'ceramic_data']:
+        for arg in ["cuts", "repetitions", "ceramic_data"]:
             if arg not in data.keys():
                 return jsonify(
                     error=f"Bad Request: Missing argument '{arg}'",
-                    status=requests.codes.bad_request
+                    status=requests.codes.bad_request,
                 )
-        cuts = data['cuts']
-        repetitions = data['repetitions']
-        ceramic_data = data['ceramic_data']
+        cuts = data["cuts"]
+        repetitions = data["repetitions"]
+        ceramic_data = data["ceramic_data"]
 
-        must = {'height', 'width'}
+        must = {"height", "width"}
         if must.intersection(set(ceramic_data.keys())) != must:
             return jsonify(
                 error="Bad Request: Argument 'ceramic_data' invalid",
-                status=requests.codes.bad_request
+                status=requests.codes.bad_request,
             )
 
         if type(repetitions) is not int:
             return jsonify(
                 error="Bad Request: Argument 'repetitions' is not integer",
-                status=requests.codes.bad_request
+                status=requests.codes.bad_request,
             )
 
-        ceramic = box(0, 0, ceramic_data['width'], ceramic_data['height'])
+        ceramic = box(0, 0, ceramic_data["width"], ceramic_data["height"])
 
         result = []
         for cut in cuts:
@@ -43,7 +45,6 @@ class Scribe(Resource):
             cut["points"] = list(scribe_lines)
             result.append(cut)
 
-        return jsonify(
-            cuts=result,
-            status=requests.codes.ok
-        )
+        send_cuts(result)
+
+        return jsonify(cuts=result, status=requests.codes.ok)

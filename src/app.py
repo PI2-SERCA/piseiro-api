@@ -5,6 +5,7 @@ from flask_mongoengine import MongoEngine
 
 from src.resources.cuts import Cuts
 from src.resources.rooms import Rooms
+from src.util.broker import declare_queue
 
 from .config import MONGO_SETTINGS
 from src.resources.floor_laying import FloorLaying
@@ -31,16 +32,15 @@ def create_app(is_testing=False):
         app.config["MONGODB_SETTINGS"] = MONGO_SETTINGS
 
     api = Api(app)
+    db = MongoEngine(app)
+
+    declare_queue()
 
     api.add_resource(Corners, "/corners")
     api.add_resource(FloorLaying, "/floor-laying")
     api.add_resource(Scribe, "/scribe")
     api.add_resource(SingleCut, "/single-cut")
-
-    db = MongoEngine(app)
-
     api.add_resource(Rooms, "/rooms")
-
     api.add_resource(Cuts, "/cuts")
 
     return app, api, db

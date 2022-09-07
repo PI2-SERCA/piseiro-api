@@ -1,10 +1,11 @@
 from flask import request, jsonify
 from flask_restful import Resource
 from shapely.geometry import box, Polygon
-from src.resources.utils import get_scribe_lines
+from src.resources.utils import get_scribe_lines, points_to_base64_image
 import requests
 
 from src.util.broker import send_cuts
+from src.util.gcode import parse_gcode
 
 
 class SingleCut(Resource):
@@ -21,8 +22,9 @@ class SingleCut(Resource):
         points = data["points"]
         repetitions = data["repetitions"]
         ceramic_data = data["ceramic_data"]
+        img_base64 = data.get("base64", None)
 
-        must = {"height", "width"}
+        must = {"height", "width", "depth"}
         if must.intersection(set(ceramic_data.keys())) != must:
             return jsonify(
                 error="Bad Request: Argument 'ceramic_data' invalid",
@@ -46,7 +48,20 @@ class SingleCut(Resource):
         cut = Polygon(points)
         scribe_lines = get_scribe_lines(cut, ceramic)
 
-        result = {"points": scribe_lines}
+        gcode = parse_gcode(scribe_lines)
+
+        result = {
+            "gcode": gcode,
+            "repetitions": repetitions,
+            "width": ceramic_data["width"],
+            "height": ceramic_data["height"],
+            "depth": ceramic_data["depth"],
+        }
+
+        if img_base64 is not None:
+            result["base64"] = img_base64
+        else:
+            result["base64"] = points_to_base64_image(points, ceramic_data)
 
         # Sending to broker
         send_cuts([result])

@@ -1,10 +1,15 @@
 from flask import request, jsonify
 from flask_restful import Resource
 from shapely.geometry import box
-from src.resources.utils import get_optimized_cut, get_scribe_lines
+from src.resources.utils import (
+    get_optimized_cut,
+    get_scribe_lines,
+    points_to_base64_image,
+)
 import requests
 
 from src.util.broker import send_cuts
+from src.util.gcode import parse_gcode
 
 
 class Scribe(Resource):
@@ -21,7 +26,7 @@ class Scribe(Resource):
         repetitions = data["repetitions"]
         ceramic_data = data["ceramic_data"]
 
-        must = {"height", "width"}
+        must = {"height", "width", "depth"}
         if must.intersection(set(ceramic_data.keys())) != must:
             return jsonify(
                 error="Bad Request: Argument 'ceramic_data' invalid",
@@ -41,9 +46,21 @@ class Scribe(Resource):
             optimized_cut = get_optimized_cut(cut["points"], ceramic)
             scribe_lines = get_scribe_lines(optimized_cut, ceramic)
 
-            # gcode = get_gcode(scribe_lines)
-            cut["points"] = list(scribe_lines)
-            result.append(cut)
+            gcode = parse_gcode(scribe_lines)
+            new_cut = {
+                "gcode": gcode,
+                "repetitions": repetitions * cut["quantity"],
+                "width": ceramic_data["width"],
+                "height": ceramic_data["height"],
+                "depth": ceramic_data["depth"],
+            }
+
+            if cut.get("base64", None) is not None:
+                new_cut["base64"] = cut["base64"]
+            else:
+                new_cut["base64"] = points_to_base64_image(cut["points"], ceramic_data)
+
+            result.append(new_cut)
 
         send_cuts(result)
 

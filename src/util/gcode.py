@@ -7,7 +7,7 @@ from pygcode import (
     GCodeUseMillimeters,
     Word,
 )
-from constants import START_POSITION, FEED_RATE, Z_AXIS_CUT_POSITION
+from src.util.constants import START_POSITION, FEED_RATE, Z_AXIS_CUT_POSITION
 
 
 def parse_gcode(scribe_lines):

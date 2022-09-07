@@ -1,11 +1,8 @@
 from src.model.cast import Cast
 
+CUT_PROPORTION = 100
+
 
 class Cut(Cast):
-    def to_json(self):
-        return {
-            "name": self.name,
-            "points": self.points,
-            "defaults": self.defaults,
-            "segments": self.segments,
-        }
+    def get_default_points(self):
+        return super().get_default_points(CUT_PROPORTION)

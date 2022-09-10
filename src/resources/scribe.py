@@ -5,6 +5,7 @@ from src.resources.utils import (
     get_optimized_cut,
     get_scribe_lines,
     points_to_base64_image,
+    simple_error_response,
 )
 import requests
 
@@ -18,25 +19,25 @@ class Scribe(Resource):
 
         for arg in ["cuts", "repetitions", "ceramic_data"]:
             if arg not in data.keys():
-                return jsonify(
-                    error=f"Bad Request: Missing argument '{arg}'",
-                    status=requests.codes.bad_request,
+                return simple_error_response(
+                    f"Bad Request: Missing argument '{arg}'", requests.codes.bad_request
                 )
+
         cuts = data["cuts"]
         repetitions = data["repetitions"]
         ceramic_data = data["ceramic_data"]
 
         must = {"height", "width", "depth"}
         if must.intersection(set(ceramic_data.keys())) != must:
-            return jsonify(
-                error="Bad Request: Argument 'ceramic_data' invalid",
-                status=requests.codes.bad_request,
+            return simple_error_response(
+                "Bad Request: Argument 'ceramic_data' invalid",
+                requests.codes.bad_request,
             )
 
         if type(repetitions) is not int:
-            return jsonify(
-                error="Bad Request: Argument 'repetitions' is not integer",
-                status=requests.codes.bad_request,
+            return simple_error_response(
+                "Bad Request: Argument 'repetitions' is not integer",
+                requests.codes.bad_request,
             )
 
         ceramic = box(0, 0, ceramic_data["width"], ceramic_data["height"])

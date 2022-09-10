@@ -7,6 +7,10 @@ import matplotlib.pyplot as plt
 import numpy as np
 
 
+def simple_error_response(msg, status, key="error"):
+    return {key: msg, "status": status}, status
+
+
 def is_valid_corner(points, a, b, c):
     fig = Polygon(points)
 

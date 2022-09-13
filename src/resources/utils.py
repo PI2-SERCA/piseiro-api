@@ -202,6 +202,8 @@ def points_to_base64_image(points, ceramic_data):
         image_bytes, format="png", dpi=fig.dpi, facecolor="white", edgecolor="none"
     )
 
+    plt.close()
+
     image_bytes.seek(0)
 
     return binary_to_base64(image_bytes.read())

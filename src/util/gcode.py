@@ -29,7 +29,7 @@ def parse_gcode(scribe_lines):
 
         g_codes.append(GCodeRapidMove(Z=START_POSITION.get("Z")))
 
-    g_codes.append(GCode(Word("G", "28.1")))
+    g_codes.append(GCodeRapidMove(START_POSITION["X"], START_POSITION["Y"]))
 
     return _g_codes_to_string(g_codes)
 

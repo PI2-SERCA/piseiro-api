@@ -15,7 +15,7 @@ jobs:
       - name: Prepare
         id: prep
         run: |
-          IMAGE_NAME=pisadinha-api
+          IMAGE_NAME=piseiro-api
           DOCKER_IMAGE=${{ secrets.DOCKER_USERNAME }}/${IMAGE_NAME#*/}
           VERSION=latest
           SHORTREF=${GITHUB_SHA::8}

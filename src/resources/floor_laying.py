@@ -9,7 +9,8 @@ from src.resources.utils import (
     get_corner_from_index,
     two_points_slope,
     get_unique_cuts,
-    points_to_base64_image
+    points_to_base64_image,
+    simple_error_response,
 )
 import numpy as np
 import requests
@@ -18,53 +19,51 @@ import requests
 class FloorLaying(Resource):
     # flake8: noqa: C901
     def get(self):
-        for arg in ['points', 'corner', 'ceramic_data']:
+        for arg in ["points", "corner", "ceramic_data"]:
             if arg not in request.args.keys():
-                return jsonify(
-                    error=f"Bad Request: Missing argument '{arg}'",
-                    status=requests.codes.bad_request
+                return simple_error_response(
+                    f"Bad Request: Missing argument '{arg}'", requests.codes.bad_request
                 )
 
-        points = request.args.get('points')
-        corner = request.args.get('corner')
-        ceramic_data = request.args.get('ceramic_data')
+        points = request.args.get("points")
+        corner = request.args.get("corner")
+        ceramic_data = request.args.get("ceramic_data")
 
         try:
             corner = int(corner)
         except Exception:
-            return jsonify(
-                error="Bad Request: Wrong format in 'corner'",
-                status=requests.codes.bad_request
+            return simple_error_response(
+                "Bad Request: Wrong format in 'corner'", requests.codes.bad_request
             )
 
         try:
             ceramic_data = json.loads(ceramic_data)
         except Exception:
-            return jsonify(
-                error="Bad Request: Wronge JSON format in 'ceramic_data'",
-                status=requests.codes.bad_request
+            return simple_error_response(
+                "Bad Request: Wronge JSON format in 'ceramic_data'",
+                requests.codes.bad_request,
             )
 
-        must = {'height', 'spacing', 'width'}
+        must = {"height", "spacing", "width"}
         if must.intersection(set(ceramic_data.keys())) != must:
-            return jsonify(
-                error="Bad Request: Argument 'ceramic_data' invalid",
-                status=requests.codes.bad_request
+            return simple_error_response(
+                "Bad Request: Argument 'ceramic_data' invalid",
+                requests.codes.bad_request,
             )
 
         try:
             points = json.loads(points)
         except Exception:
-            return jsonify(
-                error="Bad Request: Wrong JSON format in 'points'",
-                status=requests.codes.bad_request
+            return simple_error_response(
+                "Bad Request: Wrong JSON format in 'points'",
+                requests.codes.bad_request,
             )
 
         fig = Polygon(points)
         if not fig.is_valid:
-            return jsonify(
-                error="Bad Request: Polygon invalid",
-                status=requests.codes.bad_request
+            return simple_error_response(
+                "Bad Request: Polygon invalid",
+                requests.codes.bad_request,
             )
 
         a, b, c = get_corner_from_index(corner, points)
@@ -92,14 +91,17 @@ class FloorLaying(Resource):
 
         result = {"cuts": [], "full": 0}
         for x1 in np.arange(xmin + fix_x, xmax + ceramic_data["width"], total_width):
-            for y1 in np.arange(ymin + fix_y, ymax + ceramic_data["height"], total_height):
+            for y1 in np.arange(
+                ymin + fix_y, ymax + ceramic_data["height"], total_height
+            ):
                 x2 = x1 + ceramic_data["width"]
                 y2 = y1 + ceramic_data["height"]
                 ceramic = box(
                     np.around(x1, 5),
                     np.around(y1, 5),
                     np.around(x2, 5),
-                    np.around(y2, 5))
+                    np.around(y2, 5),
+                )
 
                 x, y = ceramic.exterior.coords.xy
 
@@ -137,7 +139,4 @@ class FloorLaying(Resource):
             base64 = points_to_base64_image(cut["points"], ceramic_data)
             cut["base64"] = base64
 
-        return jsonify(
-            floor_laying=result,
-            status=requests.codes.ok
-        )
+        return jsonify(floor_laying=result, status=requests.codes.ok)

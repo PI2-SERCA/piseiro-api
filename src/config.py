@@ -7,3 +7,5 @@ MONGO_SETTINGS = {
     "username": os.getenv("DB_USER", "root"),
     "password": os.getenv("DB_PASSWORD", "example"),
 }
+
+BROKER_URL = os.getenv("BROKER_URL", "amqp://guest:guest@rabbitmq:5672")

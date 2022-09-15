@@ -1,33 +1,35 @@
 from shapely.geometry import Polygon
 from flask import request, jsonify
 from flask_restful import Resource
-from src.resources.utils import get_corner_from_index, three_points_angle, is_valid_corner
+from src.resources.utils import (
+    get_corner_from_index,
+    three_points_angle,
+    is_valid_corner,
+    simple_error_response,
+)
 import json
 import requests
 
 
 class Corners(Resource):
     def get(self):
-        points = request.args.get('points')
+        points = request.args.get("points")
 
         if not points:
-            return jsonify(
-                error="Bad Request: Missing argument 'points'",
-                status=requests.codes.bad_request
+            return simple_error_response(
+                "Bad Request: Missing argument 'points'", requests.codes.bad_request
             )
 
         try:
             points = json.loads(points)
         except Exception:
-            return jsonify(
-                error="Bad Request: Wrong JSON format in 'points'",
-                status=requests.codes.bad_request
+            return simple_error_response(
+                "Bad Request: Wrong JSON format in 'points'", requests.codes.bad_request
             )
 
         if not Polygon(points).is_valid:
-            return jsonify(
-                error="Bad Request: Polygon invalid",
-                status=requests.codes.bad_request
+            return simple_error_response(
+                "Bad Request: Polygon invalid", requests.codes.bad_request
             )
 
         corners = []
@@ -40,7 +42,4 @@ class Corners(Resource):
                 if is_valid_corner(points, a, b, c):
                     corners.append(i)
 
-        return jsonify(
-            corners=corners,
-            status=requests.codes.ok
-        )
+        return jsonify(corners=corners, status=requests.codes.ok)

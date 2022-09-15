@@ -1,6 +1,13 @@
-from pygcode import (GCode, GCodeRapidMove, GCodeLinearMove, GCodeFeedRate, GCodeAbsoluteDistanceMode,
-                     GCodeUseMillimeters, Word)
-from constants import START_POSITION, FEED_RATE, Z_AXIS_CUT_POSITION
+from pygcode import (
+    GCode,
+    GCodeRapidMove,
+    GCodeLinearMove,
+    GCodeFeedRate,
+    GCodeAbsoluteDistanceMode,
+    GCodeUseMillimeters,
+    Word,
+)
+from src.util.constants import START_POSITION, FEED_RATE, Z_AXIS_CUT_POSITION
 
 
 def parse_gcode(scribe_lines):
@@ -20,9 +27,9 @@ def parse_gcode(scribe_lines):
             x_cut, y_cut = _coordinates_to_millimeters(cut_coordinate)
             g_codes.append(GCodeLinearMove(X=x_cut, Y=y_cut))
 
-        g_codes.append(GCodeRapidMove(Z=START_POSITION.get('Z')))
+        g_codes.append(GCodeRapidMove(Z=START_POSITION.get("Z")))
 
-    g_codes.append(GCode(Word('G', '28.1')))
+    g_codes.append(GCodeRapidMove(x=START_POSITION["X"], y=START_POSITION["Y"]))
 
     return _g_codes_to_string(g_codes)
 
@@ -32,9 +39,9 @@ def setup_machine():
     Setup the machine to start at the given position.
     """
     g_codes = [
-        GCode(Word('G', '28.1')),  # Return to home position
+        GCode(Word("G", "28.1")),  # Return to home position
         GCodeAbsoluteDistanceMode(),
-        GCodeUseMillimeters()
+        GCodeUseMillimeters(),
     ]
 
     return g_codes
@@ -49,4 +56,4 @@ def _meters_to_millimeters(meters):
 
 
 def _g_codes_to_string(gcode):
-    return '\n'.join(str(g) for g in gcode)
+    return "\n".join(str(g) for g in gcode)

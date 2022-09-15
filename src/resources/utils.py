@@ -7,6 +7,10 @@ import matplotlib.pyplot as plt
 import numpy as np
 
 
+def simple_error_response(msg, status, key="error"):
+    return {key: msg, "status": status}, status
+
+
 def is_valid_corner(points, a, b, c):
     fig = Polygon(points)
 
@@ -197,6 +201,8 @@ def points_to_base64_image(points, ceramic_data):
     fig.savefig(
         image_bytes, format="png", dpi=fig.dpi, facecolor="white", edgecolor="none"
     )
+
+    plt.close()
 
     image_bytes.seek(0)
 

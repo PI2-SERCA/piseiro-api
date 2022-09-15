@@ -40,7 +40,7 @@ def create_app(is_testing=False):
     api.add_resource(FloorLaying, "/floor-laying")
     api.add_resource(Scribe, "/scribe")
     api.add_resource(SingleCut, "/single-cut")
-    api.add_resource(Rooms, "/rooms")
-    api.add_resource(Cuts, "/cuts")
+    api.add_resource(Rooms, "/rooms", "/rooms/<string:room_id>")
+    api.add_resource(Cuts, "/cuts", "/cuts/<string:cut_id>")
 
     return app, api, db

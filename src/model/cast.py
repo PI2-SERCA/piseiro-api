@@ -33,6 +33,7 @@ class Cast(me.Document):
 
     def to_json(self):
         return {
+            "_id": str(self.pk),
             "name": self.name,
             "points": self.points,
             "defaults": self.defaults,

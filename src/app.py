@@ -20,6 +20,11 @@ def create_app(is_testing=False):
     """
     app = Flask(__name__)
 
+    app.config["CORS_ORIGINS"] = [
+        "http://localhost:3000",
+        "https://pisadinha.netlify.app",
+    ]
+
     CORS(app)
 
     if is_testing:

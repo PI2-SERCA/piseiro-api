@@ -23,6 +23,7 @@ def create_app(is_testing=False):
     app.config["CORS_ORIGINS"] = [
         "http://localhost:3000",
         "https://pisadinha.netlify.app",
+        "http://pisadinha.s3-website.us-east-2.amazonaws.com",
     ]
 
     CORS(app)

@@ -24,8 +24,6 @@ def parse_gcode(scribe_lines, ceramic_depth):
 
     z_offset = _calc_z_offset(ceramic_depth)
 
-    g_codes.append(GCodeRapidMove(Z=START_POSITION["Z"]))
-
     g_codes.append(GCodeRapidMove(x=START_POSITION["X"], y=START_POSITION["Y"]))
 
     for coordinates in scribe_lines:
@@ -41,9 +39,11 @@ def parse_gcode(scribe_lines, ceramic_depth):
 
         for cut_coordinate in coordinates[1:]:
             x_cut, y_cut = _coordinates_to_millimeters(cut_coordinate)
-            g_codes.append(GCodeLinearMove(X=x_cut, Y=y_cut))
+            g_codes.append(GCodeLinearMove(X=x_cut + X_OFFSET, Y=y_cut + Y_OFFSET))
 
-        g_codes.append(GCodeRapidMove(Z=START_POSITION["Z"]))
+        g_codes.append(GCodeFeedRate(Z_FEED_RATE))
+
+        g_codes.append(GCodeLinearMove(Z=START_POSITION["Z"]))
 
     g_codes.append(GCodeRapidMove(x=START_POSITION["X"], y=START_POSITION["Y"]))
 

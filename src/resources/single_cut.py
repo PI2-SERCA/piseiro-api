@@ -52,7 +52,7 @@ class SingleCut(Resource):
         cut = Polygon(points)
         scribe_lines = get_scribe_lines(cut, ceramic)
 
-        gcode = parse_gcode(scribe_lines)
+        gcode = parse_gcode(scribe_lines, ceramic_data["depth"])
 
         result = {
             "gcode": gcode,

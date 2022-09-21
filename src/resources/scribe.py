@@ -47,7 +47,7 @@ class Scribe(Resource):
             optimized_cut = get_optimized_cut(cut["points"], ceramic)
             scribe_lines = get_scribe_lines(optimized_cut, ceramic)
 
-            gcode = parse_gcode(scribe_lines)
+            gcode = parse_gcode(scribe_lines, ceramic_data["depth"])
             new_cut = {
                 "gcode": gcode,
                 "repetitions": repetitions * cut["quantity"],
